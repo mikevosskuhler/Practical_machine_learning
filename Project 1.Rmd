@@ -5,16 +5,73 @@ date: "September 5, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=T}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(magrittr)
+library(caret)
+library(randomForest)
+library(rpart)
+library(gbm)
 ```
 
-```{r}
-#(down)loading data
+# This project  
+The aim of this project is to demonstrate some basic machine learning methods,
+used to predict outcomes of a small test set. 
+To train the model we will use a much larger training set.  
 
+## downloading and loading data  
+The first step is to download and load some data  
+```{r cache=T}
+# (down)loading data
+dir <- "C:/Users/vossk/Practical_machineLearning"
+setwd(dir)
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", 
+              destfile = "training.csv")
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv",
+              destfile = "testing.csv")
+training <- read.csv("training.csv")
+testing <- read.csv("testing.csv")
 ```
 
+# Exploration and cleaning  
+Next we will explore and clean the data.  
+Our exploratory analysis showed that the data contained lots of NAs and empty values.  
+We will remove the columns containing these missing values.   
+```{r cache=T}
+str(training) #dataset contains lots of NAs
+# removing any data containing NAs
+NAFRAC <- function(x){sum(is.na(x)| x == "")/length(x)}
+v <- (apply(training, 2, NAFRAC))
+train_subs <- training[,!v]
+train_subs <- train_subs[, -(1:7)]
+```
+
+## Data partition  
+Next we create a data partition for training and testing.   
+```{r cache=T}
+set.seed(1234)
+intrain <- createDataPartition(train_subs$classe, p = 3/4, list = F)
+Train <- train_subs[intrain,]
+Test <- train_subs[-intrain,]
+```
+
+## Model building  
+Because of limited computational resources we use only use one method:  
+
+### Rpart
+Here we build a model using the rpart algorithm, then we test the accuracy. 
+
+```{r cache=T}
+model1 <- train(classe~., data = Train, method = "rpart", na.action = na.pass)
+pred <- predict(model1, Test)
+confusionMatrix(pred, Test$classe)
+```
+the accuracy here is only approaximately 50 percent.
+This is not great and would not be acceptable in a real live experiment, however,
+for now we will accept this model and predict the testing data using model1.  
+
 ```{r}
-
-
+finalpred <- predict(model1, testing)
+print(finalpred)
 ```
