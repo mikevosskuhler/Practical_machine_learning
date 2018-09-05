@@ -1,0 +1,20 @@
+---
+title: "Practical machine learning"
+author: "Mike Vosskuhler"
+date: "September 5, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#(down)loading data
+
+```
+
+```{r}
+
+
+```
